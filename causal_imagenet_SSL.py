@@ -20,7 +20,7 @@ from torch.autograd import Variable
 import os, socket, random
 import config
 
-from models.preactresnet import PreActResNet18_encoder, VAE_Small, FDC_deep_preact
+# from models.preactresnet import PreActResNet18_encoder, VAE_Small, FDC_deep_preact
 from models.resnet import FDC5
 
 from torchvision.utils import save_image
@@ -123,15 +123,15 @@ def main():
 
     if args.modelname == 'res50-4x':
         resnet = resnet50x4()
-        sd = '/proj/vondrick2/chengzhi/ssl_pretrained/simclr-converter/resnet50-4x.pth'
+        sd = '/resnet50-4x.pth'
         latent_dim = 8192  # The Following Res50x4 is 8192 out dim
     elif args.modelname == 'res50-2x':
         resnet = resnet50x2()
-        sd = '/proj/vondrick2/chengzhi/ssl_pretrained/simclr-converter/resnet50-2x.pth'
+        sd = '/resnet50-2x.pth'
         latent_dim = 4096  # The Following Res50x4 is 8192 out dim
     elif args.modelname == 'res50-1x':
         resnet = resnet50x1()
-        sd = '/proj/vondrick2/chengzhi/ssl_pretrained/simclr-converter/resnet50-1x.pth'
+        sd = '/resnet50-1x.pth'
         latent_dim = 2048
 
     sd = torch.load(sd, map_location='cpu')
@@ -143,15 +143,15 @@ def main():
     
     
 
-    from dataloader.multidomain_loader import DomainTest, RandomData, MultiDomainLoader
+    from dataloader.waterbird_loader import WB_DomainTest, WB_RandomData, WB_MultiDomainLoaderTriple
     if socket.gethostname()=='cv10':
         root_path="/local/vondrick/chengzhi/ImageNet-Data"
     elif socket.gethostname() == 'cv02':
         root_path = "/proj/vondrick/mcz/ImageNet-Data"
     elif 'cv' in socket.gethostname():
         root_path = "/proj/vondrick/mcz/ImageNet-Data"
-    sketch_root = '/proj/vondrick2/datasets/ImageNet-OOD/sketch'
-    redition_root = '/proj/vondrick2/datasets/ImageNet-OOD/imagenet-redition'
+    sketch_root = '/sketch'
+    redition_root = '/imagenet-redition'
     fore_back_root = '/proj/vondrick/james/bg_challenge_prod'
 
     if socket.gethostname() == 'cv02' or socket.gethostname() == 'cv04':
@@ -163,17 +163,17 @@ def main():
     train_sampler = None
 
     if not eval_fd:
-        train_dataset = MultiDomainLoader(dataset_root_dir=root_path,
+        train_dataset = WB_MultiDomainLoaderTriple(dataset_root_dir=root_path,
                                                 train_split=['train'], subsample=1, noNormalize=True)  # , 'D2'
         train_loader = torch.utils.data.DataLoader(
             train_dataset, batch_size=args.batch_size, shuffle=True,
             num_workers=args.workers, pin_memory=True, sampler=train_sampler)
-    test_data_sketch = DomainTest(dataset_root_dir=sketch_root,
+    test_data_sketch = WB_DomainTest(dataset_root_dir=sketch_root,
                            test_split=['val'], noNormalize=True) # As the download model is not using normalized input, we need to set noNormalize to True
-    test_data_redition = DomainTest(dataset_root_dir=redition_root,
+    test_data_redition = WB_DomainTest(dataset_root_dir=redition_root,
                                   test_split=['val'],
                                   noNormalize=True)  # As the download model is not using normalized input, we need to set noNormalize to True
-    test_rand_data = RandomData(dataset_root_dir=root_path,
+    test_rand_data = WB_RandomData(dataset_root_dir=root_path,
                                 all_split=['train'], noNormalize=True) # As the download model is not using normalized input, we need to set noNormalize to True
 
     print('datapath', root_path)
