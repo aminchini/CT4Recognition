@@ -25,7 +25,7 @@ from models.resnet import FDC5
 
 from torchvision.utils import save_image
 
-
+cwd = os.getcwd()
 
 def loss_function(recon_x, x, mu, logvar, beta):
     BCE = F.binary_cross_entropy(recon_x.view(x.size(0), -1), x.view(x.size(0), -1), reduction='mean')
@@ -133,7 +133,7 @@ def main():
         resnet = resnet50x1()
         sd = '/resnet50-1x.pth'
         latent_dim = 2048
-
+    sd = os.path.join(cwd, sd)
     sd = torch.load(sd, map_location='cpu')
     resnet.load_state_dict(sd['state_dict'])
 
@@ -150,13 +150,13 @@ def main():
         root_path = "/proj/vondrick/mcz/ImageNet-Data"
     elif 'cv' in socket.gethostname():
         root_path = "/proj/vondrick/mcz/ImageNet-Data"
-    sketch_root = '/sketch'
-    redition_root = '/imagenet-redition'
+    sketch_root = os.path.join(cwd, '/sketch')
+    redition_root = os.path.join(cwd, '/imagenet-redition')
     fore_back_root = '/proj/vondrick/james/bg_challenge_prod'
 
     if socket.gethostname() == 'cv02' or socket.gethostname() == 'cv04':
-        sketch_root = '/local/vondrick/chengzhi/sketch'
-        redition_root = '/local/vondrick/chengzhi/imagenet-redition'
+        sketch_root = os.path.join(cwd, '/sketch')
+        redition_root = os.path.join(cwd, '/imagenet-redition')
 
 
     test_d = args.style_test
